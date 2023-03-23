@@ -31,8 +31,8 @@ function sayHello(call, callback) {
   span.addEvent(`invoking sayHello() to ${call.request.getName()}`);
   const reply = new messages.HelloReply();
   reply.setMessage(`Hello ${call.request.getName()}`);
-  callback(null, reply);
   span.end();
+  callback(null, reply);
 }
 
 startServer();
