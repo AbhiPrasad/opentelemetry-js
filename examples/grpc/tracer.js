@@ -12,6 +12,16 @@ const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
 
 const EXPORTER = process.env.EXPORTER || '';
 
+const Sentry = require('@sentry/node');
+
+const { SentrySpanProcessor, SentryPropagator } = require('@sentry/opentelemetry-node')
+
+Sentry.init({
+  dsn: '__MY_DSN__',
+  instrumenter: 'otel',
+  tracesSampleRate: 1.0,
+});
+
 module.exports = (serviceName) => {
   const provider = new NodeTracerProvider({
     resource: new Resource({
@@ -27,9 +37,10 @@ module.exports = (serviceName) => {
   }
 
   provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+  provider.addSpanProcessor(new SentrySpanProcessor())
 
   // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
-  provider.register();
+  provider.register({ propagator: new SentryPropagator() });
 
   registerInstrumentations({
     instrumentations: [
